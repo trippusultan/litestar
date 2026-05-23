@@ -6,7 +6,7 @@ import pytest
 from litestar import Controller, Litestar, MediaType, get, post
 from litestar.di import Provide
 from litestar.exceptions import ImproperlyConfiguredException
-from litestar.params import Body, Dependency, FromQuery, Parameter, QueryParameter
+from litestar.params import Body, Dependency, FromQuery, QueryParameter
 from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 from litestar.testing import TestClient, create_test_client
 
@@ -20,19 +20,6 @@ def test_parsing_of_parameter_as_annotated() -> None:
 
     with create_test_client(handler) as client:
         response = client.get("/")
-        assert response.status_code == HTTP_400_BAD_REQUEST
-
-        response = client.get("/?param=a")
-        assert response.status_code == HTTP_200_OK
-
-
-def test_parsing_of_parameter_as_default() -> None:
-    @get(path="/")
-    def handler(param: str = Parameter(min_length=1)) -> str:
-        return param
-
-    with create_test_client(handler) as client:
-        response = client.get("/?param=")
         assert response.status_code == HTTP_400_BAD_REQUEST
 
         response = client.get("/?param=a")

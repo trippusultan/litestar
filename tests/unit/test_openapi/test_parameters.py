@@ -24,7 +24,6 @@ from litestar.params import (
     FromPath,
     FromQuery,
     HeaderParameter,
-    Parameter,
     PathParameter,
     QueryParameter,
 )
@@ -242,7 +241,7 @@ def test_layered_parameters() -> None:
     class MyController(Controller):
         path = "/controller"
         parameters = {
-            "controller1": Parameter(lt=100),
+            "controller1": QueryParameter(lt=100),
             "controller2": QueryParameter(annotation=str, name="controller3"),
         }
 
@@ -263,7 +262,7 @@ def test_layered_parameters() -> None:
         path="/router",
         route_handlers=[MyController],
         parameters={
-            "router1": Parameter(str, pattern="^[a-zA-Z]$"),
+            "router1": QueryParameter(annotation=str, pattern="^[a-zA-Z]$"),
             "router2": HeaderParameter(annotation=float, multiple_of=5.0, name="router3"),
         },
     )
@@ -273,8 +272,8 @@ def test_layered_parameters() -> None:
             route_handlers=[router],
             parameters={
                 "app1": CookieParameter(annotation=str, name="app4"),
-                "app2": Parameter(list[str], min_items=2),
-                "app3": Parameter(bool, required=False),
+                "app2": QueryParameter(annotation=list[str], min_items=2),
+                "app3": QueryParameter(annotation=bool, required=False),
             },
         ),
         path="/router/controller/{local}",
