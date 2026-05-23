@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import dataclasses
-import warnings
 from collections import abc
 from collections.abc import Callable, Collection, Mapping
 from dataclasses import dataclass, is_dataclass, replace
@@ -44,7 +43,7 @@ try:
 except ImportError:
     TypeAliasTypes = (TeTypeAliasType,)  # type: ignore[assignment]
 
-from litestar.exceptions import ImproperlyConfiguredException, LitestarWarning
+from litestar.exceptions import ImproperlyConfiguredException
 from litestar.params import BodyKwarg, DependencyKwarg, KwargDefinition, ParameterKwarg
 from litestar.types.builtin_types import NoneType, UnionTypes
 from litestar.utils.predicates import (
