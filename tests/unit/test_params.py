@@ -76,7 +76,8 @@ def test_parsing_of_dependency_as_default() -> None:
 def test_dependency_defaults(default: Any) -> None:
     @get("/")
     def handler(
-        value_1: Optional[int] = Dependency(default=default), value_2: Annotated[Optional[int], Dependency()] = default
+        value_1: Annotated[Optional[int], Dependency()] = default,
+        value_2: Annotated[Optional[int], Dependency()] = default,
     ) -> dict[str, Optional[int]]:
         return {"value_1": value_1, "value_2": value_2}
 
@@ -87,7 +88,7 @@ def test_dependency_defaults(default: Any) -> None:
 
 def test_dependency_non_optional_with_default() -> None:
     @get("/")
-    def handler(value: int = Dependency(default=13)) -> dict[str, int]:
+    def handler(value: Annotated[int, Dependency()] = 13) -> dict[str, int]:
         return {"value": value}
 
     with create_test_client(route_handlers=[handler]) as client:
@@ -97,7 +98,7 @@ def test_dependency_non_optional_with_default() -> None:
 
 def test_dependency_no_default() -> None:
     @get(dependencies={"value": Provide(lambda: 13, sync_to_thread=False)})
-    def test(value: int = Dependency()) -> dict[str, int]:
+    def test(value: Annotated[int, Dependency()]) -> dict[str, int]:
         return {"value": value}
 
     with create_test_client(route_handlers=[test]) as client:
@@ -107,7 +108,7 @@ def test_dependency_no_default() -> None:
 
 def test_dependency_not_provided_and_no_default() -> None:
     @get()
-    def test(value: int = Dependency()) -> dict[str, int]:
+    def test(value: Annotated[int, Dependency()]) -> dict[str, int]:
         return {"value": value}
 
     with pytest.raises(ImproperlyConfiguredException):
@@ -153,7 +154,7 @@ def test_dependency_skip_validation() -> None:
 
 def test_dependency_skip_validation_with_default() -> None:
     @get("/skipped")
-    def skipped(value: int = Dependency(default=1, skip_validation=True)) -> dict[str, int]:
+    def skipped(value: Annotated[int, Dependency(skip_validation=True)] = 1) -> dict[str, int]:
         return {"value": value}
 
     with create_test_client(route_handlers=[skipped]) as client:
