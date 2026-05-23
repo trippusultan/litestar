@@ -23,7 +23,7 @@ except ImportError:
     TypeAliasType = TeTypeAliasType
 
 from litestar import get
-from litestar.exceptions import LitestarWarning
+from litestar.exceptions import LitestarWarning, ImproperlyConfiguredException
 from litestar.params import DependencyKwarg, KwargDefinition, ParameterKwarg, QueryParameter
 from litestar.typing import FieldDefinition
 from tests.unit.test_utils.test_signature import T, _check_field_definition, field_definition_int, test_type_hints
@@ -454,28 +454,19 @@ def test_field_definition_get_type_hints_dont_resolve_generics(
     )
 
 
-def test_warn_ambiguous_default_values() -> None:
-    with pytest.warns((LitestarWarning, DeprecationWarning)):
-        FieldDefinition.from_annotation(Annotated[int, ParameterKwarg(name="something", default=1)], default=2)
-
-
 def test_warn_defaults_inside_parameter_definition() -> None:
-    with pytest.warns(DeprecationWarning, match="Deprecated default value specification"):
+    with pytest.raises(ImproperlyConfiguredException, match="Default value specified in annotation "):
         FieldDefinition.from_annotation(Annotated[int, ParameterKwarg(name="something", default=1)], default=1)
 
 
 def test_warn_default_inside_kwarg_definition_and_default_empty() -> None:
-    with pytest.warns() as warnings:
+    with pytest.raises(ImproperlyConfiguredException, match="Default value specified in annotation "):
 
         @get(sync_to_thread=False)
         def handler(foo: Annotated[int, QueryParameter(default=1)]) -> None:
             pass
 
         _ = handler.parsed_fn_signature
-
-    (record,) = warnings
-    assert record.category == DeprecationWarning
-    assert "Deprecated default value specification" in str(record.message)
 
 
 @pytest.mark.parametrize(

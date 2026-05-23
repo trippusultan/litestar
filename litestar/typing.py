@@ -444,6 +444,7 @@ class FieldDefinition:
 
         if not kwargs.get("kwarg_definition"):
             if isinstance(kwargs.get("default"), (KwargDefinition, DependencyKwarg)):
+                # TODO: Remove once all markers have been introduced
                 kwargs["kwarg_definition"] = kwargs.pop("default")
             elif kwarg_definition := next(
                 (v for v in metadata if isinstance(v, (KwargDefinition, DependencyKwarg))), None
@@ -451,23 +452,12 @@ class FieldDefinition:
                 kwargs["kwarg_definition"] = kwarg_definition
 
                 if kwarg_definition.default is not Empty:
-                    warnings.warn(
-                        f"Deprecated default value specification for annotation '{annotation}'. Setting defaults "
-                        f"inside 'typing.Annotated' is discouraged and support for this will be removed in a future "
-                        f"version. Defaults should be set with regular parameter default values. Use "
-                        "'param: Annotated[<type>, Parameter(...)] = <default>' instead of "
-                        "'param: Annotated[<type>, Parameter(..., default=<default>)].",
-                        category=DeprecationWarning,
-                        stacklevel=2,
+                    raise ImproperlyConfiguredException(
+                        f"Default value specified in annotation '{annotation}'. "
+                        "Defaults must be set as a function parameter default. Use "
+                        "'param: Annotated[<type>, Parameter(...)] = <default>' instead"
+                        "of 'param: Annotated[<type>, Parameter(..., default=<default>)].",
                     )
-                    if kwargs.get("default", Empty) is not Empty and kwarg_definition.default != kwargs["default"]:
-                        warnings.warn(
-                            f"Ambiguous default values for annotation '{annotation}'. The default value "
-                            f"'{kwarg_definition.default!r}' set inside the parameter annotation differs from the "
-                            f"parameter default value '{kwargs['default']!r}'",
-                            category=LitestarWarning,
-                            stacklevel=2,
-                        )
 
                 metadata = tuple(v for v in metadata if not isinstance(v, (KwargDefinition, DependencyKwarg)))
             elif (extra := kwargs.get("extra", {})) and "kwarg_definition" in extra:
